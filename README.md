@@ -72,7 +72,7 @@ producer is connected.
 ## Reuse skills and carry lessons forward
 
 The CLI uses `cyberops.harness.Harness`. Trusted Python callers can compose their
-own harness and pass it to `run(..., harness=...)`. Red reviewers run in parallel
+own harness and pass it to `run(..., harness=...)`. Red reviewers can run with a caller-supplied executor
 and return rule and line observations from parsed Dockerfile instructions. Blue
 triage and remediation enrich those observations. The CI review skill evaluates
 normalized check evidence and returns findings with rule, severity, risk, owner
@@ -103,3 +103,8 @@ promoting checks in the included workflow so CI can supply their results.
 
 Use CyberOps under either the [MIT License](LICENSE-MIT) or
 [Apache License 2.0](LICENSE-APACHE).
+
+## Plugin deployment modes
+
+Use the [standalone team plugins or consolidated bundle](docs/plugins.md).
+The same guide explains how to use trusted CI history to prioritize recurring findings.

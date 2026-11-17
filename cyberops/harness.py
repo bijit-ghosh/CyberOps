@@ -1,11 +1,10 @@
 """Compose defensive skills without coupling them to a model provider."""
 
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
 from . import skills
-from .evidence import review_checks
+from .plugins import blue, purple, red as red_plugin
 
 
 class AdvisoryModel(Protocol):
@@ -18,8 +17,8 @@ class AdvisoryModel(Protocol):
 class Harness:
     """Trusted callers register compatible callables when constructing the harness."""
 
-    red: tuple[Callable, ...] = (skills.red_supply_chain, skills.red_runtime_identity)
-    red_ci: Callable = review_checks
+    red: tuple[Callable, ...] = red_plugin.REVIEWERS
+    red_ci: Callable = red_plugin.review_checks
     blue_triage: Callable = skills.blue_triage
     blue_remediation: Callable = skills.blue_remediation
     purple_learning: Callable = skills.purple_learning
@@ -28,22 +27,17 @@ class Harness:
     def review_ci(self, component, checks):
         return self.red_ci(component, checks)
 
-    def assess(self, content, component, checks, pool):
-        parsed = tuple(skills.instructions(content))
-        jobs = [pool.submit(review, parsed) for review in self.red]
-        observations = [observation for job in jobs for observation in job.result()]
-        findings = self.blue_remediation(self.blue_triage(component, observations))
+    def assess(self, content, component, checks, pool=None):
+        observations = red_plugin.review(content, self.red, pool)
+        findings = blue.remediate(
+            component, observations, triage=self.blue_triage, remediation=self.blue_remediation
+        )
         if checks is not None:
             findings.extend(self.review_ci(component, checks))
         return findings
 
     def evaluate(self, findings, previous):
-        verdict = skills.purple_verify(findings, previous)
-        # Learning receives the evidence after verification and cannot alter the gate.
-        learning = self.purple_learning(
-            deepcopy(findings), deepcopy(verdict)
-        )
-        result = {"purple": verdict, "lessons": learning}
+        result = purple.verify(findings, previous, learn=self.purple_learning)
         if self.model is not None and findings:
             try:
                 note = self.model.explain(tuple((item["rule"], item["severity"]) for item in findings))

@@ -7,7 +7,7 @@ CyberOps is a model-agnostic, offline CI security gate for registered mission-cr
 ## Follow one finding
 
 1. **CI supplies the candidate.** The workflow checks that the candidate checkout matches the pull request head SHA. When a trusted evidence producer is connected, the CLI also checks the SHA declared in its normalized CI results and records the evidence file's digest.
-2. **Red reviews controls.** Static supply-chain and final-stage identity checks run in parallel. The CI review skill evaluates required defensive check results when supplied.
+2. **Red reviews controls.** Static supply-chain and final-stage identity checks run together in the bundled CLI and can run in parallel through an injected executor. The CI review skill evaluates required defensive check results when supplied.
 3. **Blue prepares remediation.** Findings include the control, risk, severity, owner and recommended change. Owners apply changes in Git and rerun the build and defensive checks independently.
 4. **Purple verifies the new result.** It compares baseline and candidate rules, records what's new, persistent or resolved, and returns pass, block or error. Missing or errored required checks fail closed.
 5. **Owners promote lessons.** A resolved CI finding can produce a regression-check proposal. An approved entry in the versioned learning policy becomes a requirement on subsequent runs.

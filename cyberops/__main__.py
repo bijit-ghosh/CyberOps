@@ -5,12 +5,11 @@ import hashlib
 import json
 import re
 import sys
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path, PurePosixPath
 
 from .evidence import IDENTIFIER, REVISION, load_evidence
-from .harness import Harness
-from .learning import apply_learning
+from .learning import apply_learning, identify_recurring_findings
+from .plugins.bundle import CyberOps
 
 VERSION = 1
 MAX_FILE_BYTES = 256_000
@@ -54,44 +53,43 @@ def inventory(path):
     return entries
 
 
-def inspect(root, component, pool, harness, checks):
+def inspect(root, component, harness, checks):
     data = read_file(root, component["dockerfile"])
-    return hashlib.sha256(data).hexdigest(), harness.assess(data, component, checks, pool)
+    return hashlib.sha256(data).hexdigest(), harness.assess(data, component, checks)
 
 
 def run(root, components, baseline, checks, baseline_checks, harness=None):
-    harness = harness or Harness()
+    harness = harness or CyberOps()
     policy = json.dumps(components, sort_keys=True, separators=(",", ":")).encode()
     results = []
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        for component in components:
-            trace = []
-            stage = "baseline"
-            try:
-                prior = set()
-                prior_digest = None
-                if baseline is not None and (baseline / component["dockerfile"]).exists():
-                    prior_digest, previous = inspect(baseline, component, pool, harness, None)
-                    prior = {finding["rule"] for finding in previous}
-                if baseline_checks is not None:
-                    prior.update(finding["rule"] for finding in harness.review_ci(component, baseline_checks))
-                stage = "red_blue_assessment"
-                digest, findings = inspect(root, component, pool, harness, checks)
-                trace.append({"stage": stage, "status": "complete", "findings": len(findings)})
-                stage = "purple_verification"
-                purple = harness.evaluate(findings, prior)
-                trace.append({"stage": stage, "status": purple["purple"]["decision"]})
-                trace.append({"stage": "purple_learning", "status": "complete",
-                              "proposals": sum("suggested_required_check" in lesson
-                                               for lesson in purple["lessons"])})
-                results.append({
-                    **component, "sha256": digest, "baseline_sha256": prior_digest,
-                    "findings": findings, "decision_trace": trace, **purple,
-                })
-            except (OSError, ValueError) as error:
-                trace.append({"stage": stage, "status": "error"})
-                results.append({**component, "purple": {"decision": "error"},
-                                "decision_trace": trace, "error": str(error)})
+    for component in components:
+        trace = []
+        stage = "baseline"
+        try:
+            prior = set()
+            prior_digest = None
+            if baseline is not None and (baseline / component["dockerfile"]).exists():
+                prior_digest, previous = inspect(baseline, component, harness, None)
+                prior = {finding["rule"] for finding in previous}
+            if baseline_checks is not None:
+                prior.update(finding["rule"] for finding in harness.review_ci(component, baseline_checks))
+            stage = "red_blue_assessment"
+            digest, findings = inspect(root, component, harness, checks)
+            trace.append({"stage": stage, "status": "complete", "findings": len(findings)})
+            stage = "purple_verification"
+            purple = harness.evaluate(findings, prior)
+            trace.append({"stage": stage, "status": purple["purple"]["decision"]})
+            trace.append({"stage": "purple_learning", "status": "complete",
+                          "proposals": sum("suggested_required_check" in lesson
+                                           for lesson in purple["lessons"])})
+            results.append({
+                **component, "sha256": digest, "baseline_sha256": prior_digest,
+                "findings": findings, "decision_trace": trace, **purple,
+            })
+        except (OSError, ValueError) as error:
+            trace.append({"stage": stage, "status": "error"})
+            results.append({**component, "purple": {"decision": "error"},
+                            "decision_trace": trace, "error": str(error)})
     decisions = {item["purple"]["decision"] for item in results}
     decision = "error" if "error" in decisions else "block" if "block" in decisions else "pass"
     return {
@@ -124,7 +122,11 @@ def main():
     parser.add_argument("--baseline-evidence", type=Path)
     parser.add_argument("--baseline-revision")
     parser.add_argument("--learning", type=Path)
+    parser.add_argument("--history", type=Path, action="append", default=[],
+                        help="Trusted earlier decision report for advisory learning (up to 20)")
     args = parser.parse_args()
+    if len(args.history) > 20:
+        parser.error("Provide at most 20 history reports")
     try:
         root = args.root.resolve(strict=True)
         baseline = args.baseline_root.resolve(strict=True) if args.baseline_root else None
@@ -149,6 +151,8 @@ def main():
         report = run(root, components, baseline, checks, previous)
         if args.candidate_revision:
             report["candidate_revision"] = args.candidate_revision
+        if args.history:
+            report["learning_feedback"] = identify_recurring_findings(report, args.history)
         if evidence:
             report["ci_evidence"] = evidence
         if baseline_evidence:
