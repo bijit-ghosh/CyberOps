@@ -91,3 +91,8 @@ trusted `cyberops-learning.json` file. Later runs apply that requirement through
 `--learning`, even if it is removed from the inventory. GitHub Actions reads
 this policy from the trusted checkout. Connect the evidence producer before
 promoting checks in the included workflow so CI can supply their results.
+
+## Architecture and metrics
+
+- [Architecture, flowchart and animated walkthrough](docs/architecture.md)
+- [Demo results and operational metrics](docs/metrics.md)
