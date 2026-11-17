@@ -1,0 +1,57 @@
+name: CyberOps
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The PR head supplies data only. Keep all executable code and policy in trusted/.
+      - name: Check out trusted policy and engine
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          path: trusted
+          persist-credentials: false
+      - name: Test trusted gate
+        working-directory: trusted
+        run: python3 -m unittest discover -s tests
+      - name: Check out candidate data
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: refs/pull/${{ github.event.number }}/head
+          path: candidate
+          persist-credentials: false
+      - name: Verify candidate revision
+        if: github.event_name == 'pull_request_target'
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git -C candidate rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Evaluate pull request
+        if: github.event_name == 'pull_request_target'
+        run: |
+          cd trusted
+          python3 -m cyberops --root ../candidate --baseline-root . \
+            --inventory cyberops-components.json --learning cyberops-learning.json --report ../cyberops-report.json
+      - name: Evaluate trusted revision
+        if: github.event_name != 'pull_request_target'
+        run: |
+          cd trusted
+          python3 -m cyberops --root . --inventory cyberops-components.json --learning cyberops-learning.json \
+            --report ../cyberops-report.json
+      - name: Upload decision and evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cyberops-report
+          path: cyberops-report.json
+          if-no-files-found: ignore

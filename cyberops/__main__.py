@@ -1,0 +1,130 @@
+"""Offline CI security review for registered mission-critical components."""
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path, PurePosixPath
+
+from .evidence import IDENTIFIER, load_evidence
+from .harness import Harness
+from .learning import apply_learning
+
+VERSION = 1
+MAX_FILE_BYTES = 256_000
+
+
+def read_file(root, relative):
+    path = root / relative
+    if not path.resolve().is_relative_to(root) or any(
+        parent.is_symlink() for parent in (path, *path.parents) if parent != root
+        and parent.is_relative_to(root)
+    ):
+        raise ValueError(f"Unexpected path for {relative}")
+    if not path.is_file() or path.stat().st_size > MAX_FILE_BYTES:
+        raise ValueError(f"Missing or oversized file: {relative}")
+    return path.read_bytes()
+
+
+def inventory(path):
+    entries = json.loads(path.read_text())
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Inventory must contain at least one component")
+    seen = set()
+    for entry in entries:
+        required = {"name", "owner", "dockerfile"}
+        if not isinstance(entry, dict) or not required <= set(entry) <= required | {"required_checks"}:
+            raise ValueError("Each component requires name, owner and dockerfile")
+        if any(not isinstance(v, str) or not v.strip() for v in (entry[key] for key in required)):
+            raise ValueError("Component fields must be nonempty strings")
+        name, filename = entry["name"], entry["dockerfile"]
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+", name) or name in seen:
+            raise ValueError("Component names must be unique identifiers")
+        path = PurePosixPath(filename)
+        if path.is_absolute() or ".." in path.parts or str(path) != filename:
+            raise ValueError("Dockerfile must be a normalized repository-relative path")
+        checks = entry.get("required_checks", [])
+        if (not isinstance(checks, list)
+                or any(not isinstance(check, str) or not IDENTIFIER.fullmatch(check) for check in checks)
+                or len(set(checks)) != len(checks)):
+            raise ValueError("Required CI checks must be unique identifiers")
+        seen.add(name)
+    return entries
+
+
+def inspect(root, component, pool, harness, checks):
+    data = read_file(root, component["dockerfile"])
+    return hashlib.sha256(data).hexdigest(), harness.assess(data, component, checks, pool)
+
+
+def run(root, components, baseline, checks, baseline_checks, harness=None):
+    harness = harness or Harness()
+    results = []
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        for component in components:
+            try:
+                prior = set()
+                prior_digest = None
+                if baseline is not None and (baseline / component["dockerfile"]).exists():
+                    prior_digest, previous = inspect(baseline, component, pool, harness, None)
+                    prior = {finding["rule"] for finding in previous}
+                if baseline_checks is not None:
+                    prior.update(finding["rule"] for finding in harness.review_ci(component, baseline_checks))
+                digest, findings = inspect(root, component, pool, harness, checks)
+                purple = harness.evaluate(findings, prior)
+                results.append({
+                    **component, "sha256": digest, "baseline_sha256": prior_digest,
+                    "findings": findings, **purple,
+                })
+            except (OSError, ValueError) as error:
+                results.append({**component, "purple": {"decision": "error"}, "error": str(error)})
+    decisions = {item["purple"]["decision"] for item in results}
+    decision = "error" if "error" in decisions else "block" if "block" in decisions else "pass"
+    return {"schema_version": VERSION, "decision": decision, "components": results}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--inventory", type=Path, required=True)
+    parser.add_argument("--baseline-root", type=Path)
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--evidence", type=Path)
+    parser.add_argument("--revision")
+    parser.add_argument("--baseline-evidence", type=Path)
+    parser.add_argument("--baseline-revision")
+    parser.add_argument("--learning", type=Path)
+    args = parser.parse_args()
+    try:
+        root = args.root.resolve(strict=True)
+        baseline = args.baseline_root.resolve(strict=True) if args.baseline_root else None
+        if not root.is_dir() or (baseline is not None and not baseline.is_dir()):
+            raise ValueError("Candidate and baseline roots must be directories")
+        if bool(args.evidence) != bool(args.revision) or bool(args.baseline_evidence) != bool(args.baseline_revision):
+            raise ValueError("Each CI evidence file requires its expected revision")
+        if args.baseline_evidence and (not baseline or not args.evidence):
+            raise ValueError("Baseline CI evidence requires a baseline root and candidate CI evidence")
+        checks, evidence = load_evidence(args.evidence, args.revision) if args.evidence else ({}, None)
+        previous, baseline_evidence = (
+            load_evidence(args.baseline_evidence, args.baseline_revision)
+            if args.baseline_evidence else (None, None)
+        )
+        components = inventory(args.inventory)
+        if args.learning:
+            components = apply_learning(components, args.learning)
+        report = run(root, components, baseline, checks, previous)
+        if evidence:
+            report["ci_evidence"] = evidence
+        if baseline_evidence:
+            report["baseline_ci_evidence"] = baseline_evidence
+    except (OSError, ValueError) as error:
+        report = {"schema_version": VERSION, "decision": "error", "error": str(error)}
+    args.report.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"CyberOps decision: {report['decision']}")
+    return {"pass": 0, "block": 1, "error": 2}[report["decision"]]
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "revision": "1111111111111111111111111111111111111111",
+  "checks": [
+    {"component": "example-service", "check": "dependency-policy", "status": "fail"},
+    {"component": "example-service", "check": "guardrail-regression", "status": "pass"}
+  ]
+}

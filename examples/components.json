@@ -1,0 +1,3 @@
+[
+  {"name": "example-service", "owner": "platform-security", "dockerfile": "Dockerfile"}
+]

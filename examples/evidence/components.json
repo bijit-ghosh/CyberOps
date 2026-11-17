@@ -1,0 +1,8 @@
+[
+  {
+    "name": "example-service",
+    "owner": "platform-security",
+    "dockerfile": "Dockerfile",
+    "required_checks": ["dependency-policy", "guardrail-regression"]
+  }
+]
