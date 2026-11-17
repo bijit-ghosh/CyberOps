@@ -97,3 +97,9 @@ promoting checks in the included workflow so CI can supply their results.
 - [Architecture, flowchart and animated walkthrough](docs/architecture.md)
 - [Demo results and operational metrics](docs/metrics.md)
 - [Agentic platform comparison and roadmap](docs/platform-comparison.md)
+- [Enterprise connector catalog and evidence exporter](docs/connectors.md)
+
+## License
+
+Use CyberOps under either the [MIT License](LICENSE-MIT) or
+[Apache License 2.0](LICENSE-APACHE).
