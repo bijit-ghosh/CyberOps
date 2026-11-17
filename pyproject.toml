@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyberops"
+version = "0.1.0"
+description = "Offline defensive security checks and evidence-based CI gates"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE", "LICENSES/*.txt"]
+
+[project.scripts]
+cyberops = "cyberops.__main__:main"
+cyberops-evidence = "cyberops.connectors:main"
+cyberops-replay = "cyberops.envs.replay:main"
+cyberops-simulate = "cyberops.swarms.simulate:main"
+
+[tool.setuptools.packages.find]
+include = ["cyberops*"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.mypy]
+strict = true
+files = ["cyberops/swarms"]

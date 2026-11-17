@@ -1,0 +1,10 @@
+services:
+  simulation:
+    build: .
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    pids_limit: 32
+    command: ["--seed", "42", "--steps", "10"]

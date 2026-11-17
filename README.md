@@ -101,8 +101,8 @@ promoting checks in the included workflow so CI can supply their results.
 
 ## License
 
-Use CyberOps under either the [MIT License](LICENSE-MIT) or
-[Apache License 2.0](LICENSE-APACHE).
+Use CyberOps under either the [MIT License](LICENSES/MIT.txt) or
+[Apache License 2.0](LICENSES/Apache-2.0.txt).
 
 ## Plugin deployment modes
 
@@ -110,3 +110,18 @@ Use the [standalone team plugins or consolidated bundle](docs/plugins.md).
 The same guide explains how to use trusted CI history to prioritize recurring findings.
 
 - [Defensive learning benchmark and 20-point swarm roadmap](docs/defensive-learning.md)
+
+## Install and simulate
+
+```sh
+python -m pip install -e .
+cyberops-simulate --seed 42 --steps 10
+docker compose run --rm simulation
+```
+
+The simulation emits a JSON audit log and decision counts for synthetic control
+reviews. The container has no runtime network access. See the
+[swarm architecture and 30-item status](docs/ARCHITECTURE.md) and
+[contributor guide](docs/CONTRIBUTING.md). For learning and CI evidence examples,
+see the [defensive replay](docs/defensive-learning.md) and
+[CI evidence quickstart](#evaluate-ci-check-evidence).
