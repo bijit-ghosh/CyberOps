@@ -2,6 +2,12 @@
 
 ## About
 
+### Product vision
+
+> This platform orchestrates coordinated red, blue, and purple team swarms to deliver continuous, autonomous cyber operations. By bridging reinforcement learning with real-time threat intelligence, it actively simulates adversary tactics and closes defense gaps offline and inline. It replaces static playbooks with decentralized decision-making that anticipates complex multi-step intrusion chains before they materialize. The system instantly translates discovered exposures into verified remediation paths and self-healing containment rules without human latency. Ultimately, it transforms enterprise security from a reactive burden into an adaptive, closed-loop engine of continuous resilience
+
+### Current implementation
+
 CyberOps orchestrates coordinated Red, Blue, and Purple teams to help enterprises
 find security gaps, validate fixes, and learn from recurring failures. It
 combines static analysis, revision-bound CI evidence, and offline simulations
@@ -138,3 +144,5 @@ see the [defensive replay](docs/defensive-learning.md) and
 [CI evidence quickstart](#evaluate-ci-check-evidence).
 
 - [Purple review ledger and offline learning feedback](docs/purple-ledger.md)
+
+- [One-page status and signed evidence setup](docs/one-page-status.md)

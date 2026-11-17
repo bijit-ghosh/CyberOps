@@ -119,6 +119,9 @@ def main():
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--revision")
+    parser.add_argument("--evidence-public-key", type=Path)
+    parser.add_argument("--evidence-signature", type=Path)
+    parser.add_argument("--baseline-evidence-signature", type=Path)
     parser.add_argument("--candidate-revision", help="Commit SHA from the trusted CI checkout")
     parser.add_argument("--baseline-evidence", type=Path)
     parser.add_argument("--baseline-revision")
@@ -142,9 +145,24 @@ def main():
             raise ValueError("Each CI evidence file requires its expected revision")
         if args.baseline_evidence and (not baseline or not args.evidence):
             raise ValueError("Baseline CI evidence requires a baseline root and candidate CI evidence")
-        checks, evidence = load_evidence(args.evidence, args.revision) if args.evidence else ({}, None)
+        if args.evidence_public_key and (
+            not args.evidence or not args.evidence_signature
+            or (args.baseline_evidence and not args.baseline_evidence_signature)
+        ):
+            raise ValueError("Signed evidence mode requires signatures for all supplied evidence")
+        if args.evidence_signature and (not args.evidence_public_key or not args.evidence):
+            raise ValueError("Candidate signature requires evidence and a trusted public key")
+        if args.baseline_evidence_signature and (not args.evidence_public_key or not args.baseline_evidence):
+            raise ValueError("Baseline signature requires baseline evidence and a trusted public key")
+        checks, evidence = (
+            load_evidence(args.evidence, args.revision, signature=args.evidence_signature,
+                          public_key=args.evidence_public_key)
+            if args.evidence else ({}, None)
+        )
         previous, baseline_evidence = (
-            load_evidence(args.baseline_evidence, args.baseline_revision)
+            load_evidence(args.baseline_evidence, args.baseline_revision,
+                          signature=args.baseline_evidence_signature,
+                          public_key=args.evidence_public_key)
             if args.baseline_evidence else (None, None)
         )
         components = inventory(args.inventory)
