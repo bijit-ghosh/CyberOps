@@ -31,7 +31,11 @@ class EvidenceGateTest(unittest.TestCase):
     def test_resolved_check_creates_regression_lesson(self):
         status, report = self.assess(self.candidate)
         self.assertEqual(status, 0)
+        self.assertEqual(report["metrics"]["required_check_results"],
+                         {"pass": 2, "fail": 0, "error": 0, "missing": 0})
+        self.assertRegex(report["effective_policy_sha256"], r"^[0-9a-f]{64}$")
         component = report["components"][0]
+        self.assertEqual(component["decision_trace"][-1]["proposals"], 1)
         self.assertIn("CI.dependency-policy", component["purple"]["resolved_rules"])
         self.assertIn("CI.dependency-policy", [lesson["rule"] for lesson in component["lessons"]])
 
@@ -47,6 +51,8 @@ class EvidenceGateTest(unittest.TestCase):
         self.candidate["checks"].pop()
         status, report = self.assess(self.candidate)
         self.assertEqual((status, report["decision"]), (2, "error"))
+        self.assertEqual(report["metrics"]["required_check_results"]["missing"], 1)
+        self.assertEqual(report["components"][0]["decision_trace"][-1]["status"], "error")
 
     def test_mismatched_revision_fails_closed(self):
         status, report = self.assess(self.candidate, revision="3" * 40)

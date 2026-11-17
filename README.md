@@ -96,3 +96,4 @@ promoting checks in the included workflow so CI can supply their results.
 
 - [Architecture, flowchart and animated walkthrough](docs/architecture.md)
 - [Demo results and operational metrics](docs/metrics.md)
+- [Agentic platform comparison and roadmap](docs/platform-comparison.md)

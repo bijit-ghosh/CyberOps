@@ -30,3 +30,11 @@ The three baseline rules are image pinning, explicit non-root user and dependenc
 The report contains gate decisions, findings and evidence hashes. Time-based and historical metrics require retaining and joining reports with CI or Git metadata. Collect a baseline before setting performance targets. A passing report reflects the configured checks, and the metrics above do not require production traces.
 
 Reproduce the example with the [README commands](../README.md#evaluate-ci-check-evidence).
+
+## Counters in the audit report
+
+Completed assessments include component pass, block and error counts and required
+check counts for pass, fail, error and missing. Use these counts to compute
+per-run evidence completeness and keep execution errors visible. Input validation
+errors can occur before these counters are available. The report also includes
+the effective component policy hash and a stage trace for each assessed component.

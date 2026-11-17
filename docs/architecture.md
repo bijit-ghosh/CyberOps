@@ -41,3 +41,7 @@ flowchart TD
 The harness accepts trusted Python callables. A provider-neutral advisory adapter may receive rule IDs and severities and return explanatory text. The gate decision comes from deterministic verification. The current GitHub workflow exercises the built-in checks. Live normalized CI evidence requires a trusted producer and artifact channel.
 
 See [Metrics and verification](metrics.md) for what the demo achieved and what to measure over time.
+
+GitHub Actions records the validated candidate checkout SHA. The report includes
+an effective policy fingerprint and per-component stage outcomes, so reviewers
+can correlate decisions with the policy and inputs used for that run.

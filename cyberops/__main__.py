@@ -8,7 +8,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path, PurePosixPath
 
-from .evidence import IDENTIFIER, load_evidence
+from .evidence import IDENTIFIER, REVISION, load_evidence
 from .harness import Harness
 from .learning import apply_learning
 
@@ -61,9 +61,12 @@ def inspect(root, component, pool, harness, checks):
 
 def run(root, components, baseline, checks, baseline_checks, harness=None):
     harness = harness or Harness()
+    policy = json.dumps(components, sort_keys=True, separators=(",", ":")).encode()
     results = []
     with ThreadPoolExecutor(max_workers=2) as pool:
         for component in components:
+            trace = []
+            stage = "baseline"
             try:
                 prior = set()
                 prior_digest = None
@@ -72,17 +75,41 @@ def run(root, components, baseline, checks, baseline_checks, harness=None):
                     prior = {finding["rule"] for finding in previous}
                 if baseline_checks is not None:
                     prior.update(finding["rule"] for finding in harness.review_ci(component, baseline_checks))
+                stage = "red_blue_assessment"
                 digest, findings = inspect(root, component, pool, harness, checks)
+                trace.append({"stage": stage, "status": "complete", "findings": len(findings)})
+                stage = "purple_verification"
                 purple = harness.evaluate(findings, prior)
+                trace.append({"stage": stage, "status": purple["purple"]["decision"]})
+                trace.append({"stage": "purple_learning", "status": "complete",
+                              "proposals": sum("suggested_required_check" in lesson
+                                               for lesson in purple["lessons"])})
                 results.append({
                     **component, "sha256": digest, "baseline_sha256": prior_digest,
-                    "findings": findings, **purple,
+                    "findings": findings, "decision_trace": trace, **purple,
                 })
             except (OSError, ValueError) as error:
-                results.append({**component, "purple": {"decision": "error"}, "error": str(error)})
+                trace.append({"stage": stage, "status": "error"})
+                results.append({**component, "purple": {"decision": "error"},
+                                "decision_trace": trace, "error": str(error)})
     decisions = {item["purple"]["decision"] for item in results}
     decision = "error" if "error" in decisions else "block" if "block" in decisions else "pass"
-    return {"schema_version": VERSION, "decision": decision, "components": results}
+    return {
+        "schema_version": VERSION, "decision": decision,
+        "effective_policy_sha256": hashlib.sha256(policy).hexdigest(),
+        "metrics": {
+            "components": {status: sum(item["purple"]["decision"] == status for item in results)
+                           for status in ("pass", "block", "error")},
+            "required_check_results": {
+                status: sum(
+                    checks.get((component["name"], check), "missing") == status
+                    for component in components for check in component.get("required_checks", [])
+                )
+                for status in ("pass", "fail", "error", "missing")
+            },
+        },
+        "components": results,
+    }
 
 
 def main():
@@ -93,6 +120,7 @@ def main():
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--revision")
+    parser.add_argument("--candidate-revision", help="Commit SHA from the trusted CI checkout")
     parser.add_argument("--baseline-evidence", type=Path)
     parser.add_argument("--baseline-revision")
     parser.add_argument("--learning", type=Path)
@@ -102,6 +130,10 @@ def main():
         baseline = args.baseline_root.resolve(strict=True) if args.baseline_root else None
         if not root.is_dir() or (baseline is not None and not baseline.is_dir()):
             raise ValueError("Candidate and baseline roots must be directories")
+        if args.candidate_revision and not REVISION.fullmatch(args.candidate_revision):
+            raise ValueError("Expected a full Git commit SHA for the candidate")
+        if args.candidate_revision and args.revision and args.candidate_revision != args.revision:
+            raise ValueError("Candidate and CI evidence revisions differ")
         if bool(args.evidence) != bool(args.revision) or bool(args.baseline_evidence) != bool(args.baseline_revision):
             raise ValueError("Each CI evidence file requires its expected revision")
         if args.baseline_evidence and (not baseline or not args.evidence):
@@ -115,6 +147,8 @@ def main():
         if args.learning:
             components = apply_learning(components, args.learning)
         report = run(root, components, baseline, checks, previous)
+        if args.candidate_revision:
+            report["candidate_revision"] = args.candidate_revision
         if evidence:
             report["ci_evidence"] = evidence
         if baseline_evidence:
