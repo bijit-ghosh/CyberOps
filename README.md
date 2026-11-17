@@ -125,3 +125,5 @@ reviews. The container has no runtime network access. See the
 [contributor guide](docs/CONTRIBUTING.md). For learning and CI evidence examples,
 see the [defensive replay](docs/defensive-learning.md) and
 [CI evidence quickstart](#evaluate-ci-check-evidence).
+
+- [Purple review ledger and offline learning feedback](docs/purple-ledger.md)
