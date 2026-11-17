@@ -1,6 +1,17 @@
 # CyberOps
 
-CyberOps reviews container build controls for registered mission-critical components. This first release runs six deterministic agents in three teams through an offline Python CLI and a GitHub Actions workflow.
+## About
+
+CyberOps orchestrates coordinated Red, Blue, and Purple teams to help enterprises
+find security gaps, validate fixes, and learn from recurring failures. It
+combines static analysis, revision-bound CI evidence, and offline simulations
+with a deterministic release gate. Blue teams receive prioritized remediation
+guidance. Purple teams verify fixes and turn approved lessons into regression
+requirements. The platform is model-agnostic and keeps production traces
+outside the current workflow.
+
+See the [enterprise capability map](docs/enterprise-resilience.md) for the ten
+objectives, current capabilities, and roadmap.
 
 | Team | Agents | Handoff |
 | --- | --- | --- |

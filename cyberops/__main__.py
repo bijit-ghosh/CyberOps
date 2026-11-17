@@ -10,6 +10,7 @@ from pathlib import Path, PurePosixPath
 from .evidence import IDENTIFIER, REVISION, load_evidence
 from .learning import apply_learning, identify_recurring_findings
 from .plugins.bundle import CyberOps
+from .prioritization import load_context, prioritize
 
 VERSION = 1
 MAX_FILE_BYTES = 256_000
@@ -124,6 +125,7 @@ def main():
     parser.add_argument("--learning", type=Path)
     parser.add_argument("--history", type=Path, action="append", default=[],
                         help="Trusted earlier decision report for advisory learning (up to 20)")
+    parser.add_argument("--exposure-context", type=Path, help="Trusted advisory reachability evidence")
     args = parser.parse_args()
     if len(args.history) > 20:
         parser.error("Provide at most 20 history reports")
@@ -151,6 +153,16 @@ def main():
         report = run(root, components, baseline, checks, previous)
         if args.candidate_revision:
             report["candidate_revision"] = args.candidate_revision
+        if args.exposure_context:
+            try:
+                context, context_digest = load_context(
+                    args.exposure_context, args.candidate_revision or args.revision
+                )
+                report["triage"] = {"status": "complete", "sha256": context_digest,
+                                    "queue": prioritize(report, context)}
+            except (OSError, ValueError, RecursionError) as error:
+                report["triage"] = {"status": "error", "error": str(error),
+                                    "queue": prioritize(report, {})}
         if args.history:
             report["learning_feedback"] = identify_recurring_findings(report, args.history)
         if evidence:

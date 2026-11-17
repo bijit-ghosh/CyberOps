@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "revision": "1111111111111111111111111111111111111111",
+  "findings": [
+    {"component": "example-service", "rule": "IMAGE_PIN", "reachability": "reachable"}
+  ]
+}
