@@ -1,0 +1,7 @@
+[
+  {"id": "train-01", "control": "dependency-policy", "review": "priority"},
+  {"id": "train-02", "control": "dependency-policy", "review": "priority"},
+  {"id": "train-03", "control": "dependency-policy", "review": "priority"},
+  {"id": "train-04", "control": "build-metadata", "review": "standard"},
+  {"id": "train-05", "control": "build-metadata", "review": "priority"}
+]

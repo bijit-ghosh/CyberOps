@@ -1,0 +1,5 @@
+[
+  {"id": "eval-01", "control": "dependency-policy", "review": "priority"},
+  {"id": "eval-02", "control": "build-metadata", "review": "standard"},
+  {"id": "eval-03", "control": "identity-review", "review": "priority"}
+]

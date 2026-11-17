@@ -108,3 +108,5 @@ Use CyberOps under either the [MIT License](LICENSE-MIT) or
 
 Use the [standalone team plugins or consolidated bundle](docs/plugins.md).
 The same guide explains how to use trusted CI history to prioritize recurring findings.
+
+- [Defensive learning benchmark and 20-point swarm roadmap](docs/defensive-learning.md)
