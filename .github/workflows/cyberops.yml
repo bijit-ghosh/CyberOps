@@ -50,6 +50,10 @@ jobs:
           cd trusted
           python3 -m cyberops --root . --candidate-revision "$(git rev-parse HEAD)" --inventory cyberops-components.json --learning cyberops-learning.json \
             --report ../cyberops-report.json
+      - name: Show findings and remediation
+        if: always() && hashFiles('cyberops-report.json') != ''
+        working-directory: trusted
+        run: python3 -m cyberops.summary ../cyberops-report.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload decision and evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

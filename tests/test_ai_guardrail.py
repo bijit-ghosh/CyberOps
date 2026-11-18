@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from cyberops.summary import finding_id, render
+
 
 class AIGuardrailTest(unittest.TestCase):
     def test_control_context_and_verified_fix(self):
@@ -20,10 +22,19 @@ class AIGuardrailTest(unittest.TestCase):
                 initial + ["--exposure-context", str(fixture / "context.json")], capture_output=True
             )
             self.assertEqual(result.returncode, 1)
-            queued, = json.loads(report.read_text())["triage"]["queue"]
+            blocked = json.loads(report.read_text())
+            queued, = blocked["triage"]["queue"]
+            summary = render(blocked)
+            identifier = finding_id("partner-chatbot", "CI.tool-output-sanitization")
+            self.assertIn(identifier, summary)
+            self.assertIn("**Next step**", summary)
+            self.assertIn("tool&#45;response&#45;boundary", summary)
             self.assertEqual(queued["owner"], "ai-platform")
             self.assertEqual(queued["reachability"], "unknown")
             self.assertEqual(len(queued["relationships"]), 3)
+            blocked["triage"]["queue"][0]["owner"] = "[click](https://example.test)\n## Injected"
+            self.assertNotIn("[click]", render(blocked))
+            self.assertNotIn("\n## Injected", render(blocked))
 
             invalid_context = Path(directory) / "invalid.json"
             invalid = json.loads((fixture / "context.json").read_text())
@@ -44,7 +55,10 @@ class AIGuardrailTest(unittest.TestCase):
                 "--baseline-evidence", str(fixture / "before.json"),
             ], capture_output=True)
             self.assertEqual(result.returncode, 0)
-            component, = json.loads(report.read_text())["components"]
+            passed = json.loads(report.read_text())
+            self.assertIn(identifier, render(passed))
+            self.assertIn("**Regression proposal**", render(passed))
+            component, = passed["components"]
             self.assertEqual(component["purple"]["resolved_rules"], ["CI.tool-output-sanitization"])
             self.assertEqual(component["lessons"][0]["suggested_required_check"],
                              "tool-output-sanitization")

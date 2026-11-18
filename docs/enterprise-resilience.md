@@ -85,3 +85,20 @@ attaches the supplied links to the matching finding. It preserves unknown
 reachability and uses the same gate decision if context is missing, malformed
 or stale. These are reviewed associations, with no inferred access paths or
 production discovery.
+
+### Find the issue in GitHub Actions
+
+Open the **CyberOps** workflow run in GitHub Actions and select its job
+summary. Match the reported candidate revision to your pull request. The summary surfaces open findings with their owner, risk, next step
+and any reviewed context supplied by the CI producer. The same component and
+rule share a `CO-` finding ID across candidate revisions. Search for that ID in
+the later summary's **Verified against the baseline** section to see the
+resolution and any regression proposal. Finding IDs are scoped to the
+repository's component inventory. Download the `cyberops-report` artifact for
+individual observations and the full evidence trace.
+
+Render either demo report locally with
+`python -m cyberops.summary /tmp/cyberops-chatbot-before.json`. The checked-in
+workflow displays findings from its default static checks. To display AI
+guardrail evidence and reviewed context in a hosted run, connect a trusted
+producer and pass those artifacts to the gate.
