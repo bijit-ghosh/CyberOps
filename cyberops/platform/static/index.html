@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CyberOps Console</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><span aria-hidden="true">∞</span> CyberOps</a><span>Release security</span></header>
+  <main>
+    <section class="hero">
+      <h1>Release overview</h1>
+      <p>Inspect CI evidence, prioritize fixes, and record Purple team reviews.</p>
+    </section>
+    <form id="connect" class="panel toolbar">
+      <div><label for="token">Console access token</label>
+      <input id="token" type="password" required minlength="32" autocomplete="off"></div>
+      <button>Connect</button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <div id="workspace" hidden>
+      <div class="actions">
+        <span id="revision"></span>
+        <button id="refresh" class="secondary">Refresh</button>
+        <button id="disconnect" class="secondary">Disconnect</button>
+      </div>
+      <section class="metrics" aria-label="Release metrics">
+        <div><span>Gate decision</span><strong id="decision">—</strong></div>
+        <div><span>Open findings</span><strong id="count">—</strong></div>
+        <div><span>Required evidence</span><strong id="completeness">—</strong></div>
+        <div><span>Pending reviews</span><strong id="pending">—</strong></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><h2>Findings</h2>
+          <div><label for="filter">Search findings</label>
+          <input id="filter" type="search" placeholder="Component, rule, or owner"></div>
+        </div>
+        <div id="findings"></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><h2>Purple review queue</h2><button id="import" class="secondary">Import current findings</button></div>
+        <div id="queue"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -18,7 +18,10 @@ def read_findings(path):
         data = stream.read(MAX_REPORT_BYTES + 1)
     if len(data) > MAX_REPORT_BYTES:
         raise ValueError("Report exceeds size limit")
-    report = json.loads(data)
+    return parse_findings(json.loads(data))
+
+
+def parse_findings(report):
     if not isinstance(report, dict) or report.get("schema_version") != 1:
         raise ValueError("Expected a CyberOps decision report")
     revision = report.get("candidate_revision")
@@ -81,14 +84,16 @@ def ingest(database, path):
         return insert_findings(database, entries)
 
 
-def record_review(database, case_id, reviewer, label):
+def record_review(database, case_id, reviewer, label, *, policy=None):
     if not IDENTIFIER.fullmatch(reviewer) or label not in REVIEW_LABELS:
         raise ValueError("Invalid reviewer identifier or review label")
     with database:
-        cursor = database.execute(
-            "UPDATE cases SET review = ?, reviewer = ? WHERE id = ? AND review IS NULL",
-            (label, reviewer, case_id),
-        )
+        query = "UPDATE cases SET review = ?, reviewer = ? WHERE id = ? AND review IS NULL"
+        args = (label, reviewer, case_id)
+        if policy is not None:
+            query += " AND policy = ?"
+            args += (policy,)
+        cursor = database.execute(query, args)
         if cursor.rowcount != 1:
             raise ValueError("Case is unknown or already reviewed")
 

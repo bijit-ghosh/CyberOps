@@ -42,6 +42,11 @@ CyberOps ships standalone team plugins and a bundled, model-agnostic CLI. It sup
 
 Track **mean time to detect**, **mean time to verified remediation**, **critical-component coverage**, **required-evidence completeness**, and **finding recurrence rate**. The local synthetic gate produced a blocked report in 55 ms median and verified the corrected fixture in 78 ms median across 20 samples per case. Enterprise detection and remediation times have yet to be measured. [Definitions and benchmark scope](docs/metrics.md)
 
+## Operator console
+
+CyberOps 0.2.0 adds a browser console and authenticated local API for finding
+triage and Purple reviews. [Start the console](docs/operator-console.md)
+
 ## Initial release
 
 [CyberOps 0.1.0](releases/v0.1.0/README.md) includes the installable Python wheel,
