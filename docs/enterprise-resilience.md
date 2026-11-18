@@ -48,3 +48,40 @@ changes the release decision. The example uses synthetic reachability.
 Use an authenticated artifact channel to establish the context producer's
 identity. The revision field and SHA-256 identify the expected revision and
 the input bytes. They do not verify the reachability claim independently.
+
+## AI guardrail example
+
+A synthetic partner chatbot requires the `tool-output-sanitization` check.
+Its CI context can explicitly link the failing check to a tool response
+boundary, service identity and protected data class. Use identifiers from
+approved architecture records and keep secrets and actual records upstream.
+
+```sh
+python -m cyberops --root examples/after \
+  --inventory examples/ai-guardrail/components.json \
+  --revision 1111111111111111111111111111111111111111 \
+  --evidence examples/ai-guardrail/before.json \
+  --exposure-context examples/ai-guardrail/context.json \
+  --report /tmp/cyberops-chatbot-before.json
+
+python -m cyberops --root examples/after --baseline-root examples/after \
+  --inventory examples/ai-guardrail/components.json \
+  --revision 2222222222222222222222222222222222222222 \
+  --evidence examples/ai-guardrail/after.json \
+  --baseline-revision 1111111111111111111111111111111111111111 \
+  --baseline-evidence examples/ai-guardrail/before.json \
+  --report /tmp/cyberops-chatbot-after.json
+```
+
+The first command blocks and shows the reviewed relationships in the triage
+queue. The second passes, marks the check resolved and proposes it as a future
+regression requirement. The fixture represents upstream results and does not
+run the chatbot or its application-specific sanitization test.
+
+Each exposure context record can optionally carry up to 16 unique
+`relationships`, with a `relationship` of `validates-control`,
+`uses-identity` or `protects-data-class` and a `target` identifier. CyberOps
+attaches the supplied links to the matching finding. It preserves unknown
+reachability and uses the same gate decision if context is missing, malformed
+or stale. These are reviewed associations, with no inferred access paths or
+production discovery.

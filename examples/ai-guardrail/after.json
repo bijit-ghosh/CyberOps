@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "revision": "2222222222222222222222222222222222222222",
+  "checks": [
+    {"component": "partner-chatbot", "check": "tool-output-sanitization", "status": "pass"}
+  ]
+}

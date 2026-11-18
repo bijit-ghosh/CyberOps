@@ -1,0 +1,8 @@
+[
+  {
+    "name": "partner-chatbot",
+    "owner": "ai-platform",
+    "dockerfile": "Dockerfile",
+    "required_checks": ["tool-output-sanitization"]
+  }
+]

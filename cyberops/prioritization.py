@@ -7,6 +7,25 @@ from .evidence import IDENTIFIER, MAX_EVIDENCE_BYTES, REVISION
 
 REACHABILITY = {"reachable": 2, "unknown": 1, "unreachable": 0}
 SEVERITY = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+RELATIONSHIPS = {"validates-control", "uses-identity", "protects-data-class"}
+MAX_RELATIONSHIPS = 16
+
+
+def read_relationships(rows):
+    if not isinstance(rows, list) or len(rows) > MAX_RELATIONSHIPS:
+        raise ValueError("Exposure relationships must be a bounded list")
+    links = set()
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {"relationship", "target"}:
+            raise ValueError("Invalid exposure relationship record")
+        relationship, target = row["relationship"], row["target"]
+        if (not isinstance(relationship, str) or relationship not in RELATIONSHIPS
+                or not isinstance(target, str) or not IDENTIFIER.fullmatch(target)
+                or (relationship, target) in links):
+            raise ValueError("Invalid or duplicate exposure relationship")
+        links.add((relationship, target))
+    return [{"relationship": relationship, "target": target}
+            for relationship, target in sorted(links)]
 
 
 def load_context(path, revision):
@@ -22,14 +41,18 @@ def load_context(path, revision):
         raise ValueError("Exposure context schema or revision does not match")
     context = {}
     for row in document["findings"]:
-        if not isinstance(row, dict) or set(row) != {"component", "rule", "reachability"}:
+        required = {"component", "rule", "reachability"}
+        if not isinstance(row, dict) or not required <= set(row) <= required | {"relationships"}:
             raise ValueError("Invalid exposure context record")
         component, rule, state = row["component"], row["rule"], row["reachability"]
         if (any(not isinstance(value, str) or not IDENTIFIER.fullmatch(value)
                 for value in (component, rule))
                 or not isinstance(state, str) or state not in REACHABILITY or (component, rule) in context):
             raise ValueError("Invalid or duplicate exposure context record")
-        context[component, rule] = state
+        metadata = {"reachability": state, "reachability_source": "supplied"}
+        if "relationships" in row:
+            metadata["relationships"] = read_relationships(row["relationships"])
+        context[component, rule] = metadata
     return context, sha256(data).hexdigest()
 
 
@@ -43,8 +66,9 @@ def prioritize(report, context):
                 groups[key] = finding
     queue = [
         {"component": component, "rule": rule, "severity": finding["severity"],
-         "owner": finding["owner"], "reachability": context.get((component, rule), "unknown"),
-         "reachability_source": "supplied" if (component, rule) in context else "unavailable"}
+         "owner": finding["owner"], **context.get((component, rule), {
+             "reachability": "unknown", "reachability_source": "unavailable",
+         })}
         for (component, rule), finding in groups.items()
     ]
     queue.sort(key=lambda row: (

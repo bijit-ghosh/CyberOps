@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "revision": "1111111111111111111111111111111111111111",
+  "findings": [
+    {
+      "component": "partner-chatbot",
+      "rule": "CI.tool-output-sanitization",
+      "reachability": "unknown",
+      "relationships": [
+        {"relationship": "validates-control", "target": "tool-response-boundary"},
+        {"relationship": "uses-identity", "target": "chatbot-service-account"},
+        {"relationship": "protects-data-class", "target": "partner-records"}
+      ]
+    }
+  ]
+}
