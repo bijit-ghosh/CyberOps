@@ -87,18 +87,25 @@ def record_review(database, case_id, reviewer, label):
             raise ValueError("Case is unknown or already reviewed")
 
 
-def pending(database):
+def pending(database, *, policy=None):
+    query = "SELECT id, revision, component, control FROM cases WHERE review IS NULL"
+    args = ()
+    if policy is not None:
+        query += " AND policy = ?"
+        args = (policy,)
     return [
         {"id": case, "revision": revision, "component": component, "control": control}
-        for case, revision, component, control in database.execute(
-            "SELECT id, revision, component, control FROM cases WHERE review IS NULL ORDER BY id"
-        )
+        for case, revision, component, control in database.execute(query + " ORDER BY id", args)
     ]
 
 
-def replay_rows(database, policy):
+def validate_policy(policy):
     if len(policy) != 64 or any(c not in "0123456789abcdef" for c in policy):
         raise ValueError("An effective policy digest is required")
+
+
+def replay_rows(database, policy):
+    validate_policy(policy)
     return [
         {"id": case, "control": control, "review": review}
         for case, control, review in database.execute(

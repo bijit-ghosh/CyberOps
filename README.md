@@ -147,3 +147,5 @@ see the [defensive replay](docs/defensive-learning.md) and
 - [One-page status and signed evidence setup](docs/one-page-status.md)
 
 - [Cross-language contracts and Node.js example](docs/interoperability.md)
+
+- [Initiate or resume the defensive feedback cycle](docs/feedback-cycle.md)

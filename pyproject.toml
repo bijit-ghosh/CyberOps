@@ -16,6 +16,7 @@ cyberops = "cyberops.__main__:main"
 cyberops-evidence = "cyberops.connectors:main"
 cyberops-replay = "cyberops.envs.replay:main"
 cyberops-ledger = "cyberops.ledger:main"
+cyberops-feedback = "cyberops.feedback:main"
 cyberops-simulate = "cyberops.swarms.simulate:main"
 
 [tool.setuptools.packages.find]

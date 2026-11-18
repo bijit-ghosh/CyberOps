@@ -31,5 +31,6 @@ jobs:
           "$venv/cyberops" --help
           "$venv/cyberops-evidence" --help
           "$venv/cyberops-ledger" --help
+          "$venv/cyberops-feedback" --help
           "$venv/cyberops-replay" --help
           "$venv/cyberops-simulate" --seed 42 --steps 10
