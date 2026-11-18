@@ -138,7 +138,7 @@ docker compose run --rm simulation
 
 The simulation emits a JSON audit log and decision counts for synthetic control
 reviews. The container has no runtime network access. See the
-[swarm architecture and 30-item status](docs/ARCHITECTURE.md) and
+[swarm architecture and 30-item status](docs/swarm-architecture.md) and
 [contributor guide](docs/CONTRIBUTING.md). For learning and CI evidence examples,
 see the [defensive replay](docs/defensive-learning.md) and
 [CI evidence quickstart](#evaluate-ci-check-evidence).

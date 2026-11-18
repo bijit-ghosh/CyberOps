@@ -9,9 +9,27 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - run: python3 -m unittest discover -s tests
-      - run: python3 -m cyberops.swarms.simulate --seed 42 --steps 10
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests
+      - name: Verify installed wheel outside the checkout
+        run: |
+          set -eu
+          python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/wheels" .
+          python -m venv "$RUNNER_TEMP/cyberops-venv"
+          venv="$RUNNER_TEMP/cyberops-venv/bin"
+          "$venv/python" -m pip install --no-deps "$RUNNER_TEMP"/wheels/cyberops-*.whl
+          cd "$RUNNER_TEMP"
+          "$venv/cyberops" --help
+          "$venv/cyberops-evidence" --help
+          "$venv/cyberops-ledger" --help
+          "$venv/cyberops-replay" --help
+          "$venv/cyberops-simulate" --seed 42 --steps 10

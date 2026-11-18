@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import sys
+import tempfile
 from pathlib import Path, PurePosixPath
 
 from .evidence import IDENTIFIER, REVISION, load_evidence
@@ -187,9 +188,16 @@ def main():
             report["ci_evidence"] = evidence
         if baseline_evidence:
             report["baseline_ci_evidence"] = baseline_evidence
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, RecursionError) as error:
         report = {"schema_version": VERSION, "decision": "error", "error": str(error)}
-    args.report.write_text(json.dumps(report, indent=2) + "\n")
+    try:
+        with tempfile.TemporaryDirectory(prefix=".cyberops-report-", dir=args.report.parent) as directory:
+            pending_report = Path(directory) / "report.json"
+            pending_report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+            pending_report.replace(args.report)
+    except OSError as error:
+        print(f"CyberOps could not publish the report: {error}", file=sys.stderr)
+        return 2
     print(f"CyberOps decision: {report['decision']}")
     return {"pass": 0, "block": 1, "error": 2}[report["decision"]]
 

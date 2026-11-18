@@ -56,7 +56,7 @@ def identify_recurring_findings(report, paths):
                 for rule in item["purple"]["resolved_rules"]
                 if isinstance(rule, str)
             }
-        except (OSError, ValueError, TypeError, KeyError):
+        except (OSError, ValueError, TypeError, KeyError, RecursionError):
             continue
         resolved.update(prior_resolutions)
         used_revisions.add(revision)
