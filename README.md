@@ -4,41 +4,45 @@
 
 ## About
 
-CyberOps is designed as a coordinated multi-agent swarm to continuously simulate advanced adversary tactics (Red), detect and isolate emerging threats in real time (Blue), and dynamically improve security posture through shared intelligence (Purple). Today, CyberOps brings that operating model to pre-release CI/CD and offline defensive evaluation.
+CyberOps coordinates Red, Blue, and Purple teams to find security gaps, guide fixes, and verify what changed. Today it operates in pre-release CI/CD and offline defensive evaluation.
 
 ## Mission
 
-Help every organization build and operate software and AI systems that get harder to compromise with every release. Make security a continuous engineering practice, where teams can act at machine speed, prove that their controls work, and remain accountable for decisions that affect critical services.
+Make every release an opportunity to strengthen the defenses of software and AI systems. Give engineering and security teams the evidence to act quickly, verify their controls, and stay accountable for decisions that affect critical services.
 
 ## Product vision
 
-CyberOps will connect preventive testing, detection, response, and learning across the software lifecycle. Red will use authorized, controlled simulations to challenge assumptions about how applications and AI services are protected. Blue will turn trusted signals into prioritized decisions and contain threats within approved limits. Purple will verify that fixes work and turn lessons across teams into stronger controls and regression tests.
+CyberOps will connect preventive testing, detection, response, and learning across the software lifecycle. Red will challenge controls in authorized simulations. Blue will use trusted signals to prioritize and contain threats within approved limits. Purple will verify fixes and turn shared lessons into stronger controls.
 
-Teams will be able to adopt those capabilities independently or as a coordinated swarm, choose their models and tools, and decide where automation can act. Every consequential decision should be traceable to evidence, an owner, and an approval policy.
+Teams will be able to deploy each capability independently or run the teams together, choose their models and tools, and define where automation can act. Every consequential decision should be traceable to evidence, an owner, and an approval policy.
 
 ## What we’ve achieved
 
-| Team | Shipped capabilities |
+| Team | What ships today |
 | --- | --- |
 | Red | Reviews container build controls and evaluates defensive check results supplied by CI. |
-| Blue | Gives findings an owner, severity, and next step. The CI summary can surface reviewed reachability, control, identity, and data context. |
-| Purple | Makes a deterministic release decision, verifies fixes against a baseline, and proposes regression checks. The review ledger feeds analyst-labeled cases into offline evaluation. |
+| Blue | Assigns an owner, severity, and next step. The CI summary can include reviewed context about reachability, controls, identities, and data. |
+| Purple | Sets a deterministic release decision, verifies fixes against a baseline, and proposes regression checks. The review ledger supplies analyst-labeled cases for offline evaluation. |
 
-CyberOps provides standalone team plugins and a bundled, model-agnostic CLI. It supports revision-bound evidence, optional signature verification, and stable finding IDs across open and resolved CI summaries. The current workflow uses pre-release evidence and keeps production traces disconnected. [Architecture](docs/architecture.md) · [Readiness and verification](docs/one-page-status.md)
+CyberOps ships standalone team plugins and a bundled, model-agnostic CLI. It supports evidence tied to a Git revision, optional signature verification, and stable finding IDs across CI runs. Production traces remain outside the current workflow. [Architecture](docs/architecture.md) · [Readiness and verification](docs/one-page-status.md)
 
 ## What we need to achieve
 
-1. **Prove the full loop on mission-critical services.** Connect authenticated evidence producers, require the gate on the exact release revision, and verify real application and AI guardrail fixes in their normal pull-request workflows.
-2. **Make risks explainable across the enterprise.** Connect services, dependencies, identities, controls, data classes, and ownership so teams can see what is affected and what evidence supports the decision.
-3. **Move from recommendations to governed response.** Establish authenticated approvals, scoped actions, protected-service safeguards, and rollback. Validate response policies offline before introducing authorized live detection and containment.
-4. **Turn each verified fix into durable protection.** Carry approved lessons across components, validate changes against held-out evidence, and measure time to verified fix, recurrence, and control coverage.
-5. **Scale with deployment flexibility.** Support enterprise CI and security integrations, independently deployable teams, and traceable decisions across environments and model providers.
+1. **Prove the loop on critical services.** Connect authenticated evidence producers, require a result for the exact release revision, and verify application and AI guardrail fixes in real pull requests.
+2. **Show what a finding affects.** Link services, controls, identities, and data to the evidence and owner responsible for the fix.
+3. **Govern live response.** Establish authenticated approvals, scoped actions, protected-service safeguards, and rollback. Validate response policies offline before deploying authorized live detection and containment.
+4. **Make verified fixes last.** Carry approved lessons into regression policy and check whether findings recur across releases.
+5. **Support different enterprise environments.** Extend CI and security integrations while keeping team interfaces portable and decisions auditable.
 
 [Enterprise capability map and examples](docs/enterprise-resilience.md) · [Founding design article](https://medium.com/@bijit211987/agentic-security-framework-1c253af8a223)
 
+## Key metrics
+
+Track **mean time to detect**, **mean time to verified remediation**, **critical-component coverage**, **required-evidence completeness**, and **finding recurrence rate**. The local synthetic gate produced a blocked report in 55 ms median and verified the corrected fixture in 78 ms median across 20 samples per case. Enterprise detection and remediation times have yet to be measured. [Definitions and benchmark scope](docs/metrics.md)
+
 ## Run it locally
 
-Use Python 3.10 or later with no external packages.
+Use Python 3.10 or later. The default gate has no third-party Python dependencies.
 
 ```sh
 python3 -m cyberops --root examples/before \
@@ -61,7 +65,7 @@ A report binds each successful assessment to SHA-256 hashes of the reviewed Dock
 
 ## Scope and next milestones
 
-The Dockerfile parser supports a limited syntax and returns an error for constructs such as continuation lines, heredocs and custom parser directives. Pin checking validates the reference format, while provenance and image availability require separate evidence. The first release uses static reviews and remediation guidance. It has no model provider, active attack runner, automatic patch writer, production credentials or telemetry connector.
+The Dockerfile parser supports a limited syntax and returns an error for constructs such as continuation lines, heredocs and custom parser directives. Pin checking validates the reference format, while provenance and image availability require separate evidence. The current release uses static review, trusted CI results, and remediation guidance. The default gate runs offline. An optional model adapter can add advisory explanations.
 
 1. Map critical services and their trust boundaries to reviewed ownership and inventory entries.
 2. Add defensive scanner adapters for dependency, IaC and secret findings. Require scanner freshness and artifact identity before relying on their results.
@@ -98,8 +102,7 @@ producer is connected.
 ## Reuse skills and carry lessons forward
 
 The CLI uses `cyberops.harness.Harness`. Trusted Python callers can compose their
-own harness and pass it to `run(..., harness=...)`. Red reviewers can run with a caller-supplied executor
-and return rule and line observations from parsed Dockerfile instructions. Blue
+own harness and pass it to `run(..., harness=...)`. Red reviewers return rule and line observations from parsed Dockerfile instructions and can run with a caller-supplied executor. Blue
 triage and remediation enrich those observations. The CI review skill evaluates
 normalized check evidence and returns findings with rule, severity, risk, owner
 and remediation. Purple's deterministic verification sets the gate. Its
