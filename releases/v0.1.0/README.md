@@ -26,9 +26,9 @@ checksum before using it as a supply-chain control.
 | Choice | Why use it | Trade-off |
 | --- | --- | --- |
 | Python 3.12 with the wheel | Reproduces the tested release environment. The wheel installs without third-party runtime packages. | Your team owns runtime patching and runner lifecycle. |
-| Python 3.10 with the wheel | Maintains compatibility with existing CI runners. It is the declared minimum. | This release was validated locally on 3.12. Verify the 3.10 CI matrix before relying on it. |
+| Python 3.10 with the wheel | Maintains compatibility with existing CI runners. It is the declared minimum. | The hosted matrix passed on 3.10 and 3.12. Use the runtime version approved for your deployment. |
 | Managed CI runner | Providers provision Python and retain workflow artifacts. Developers can consume the gate through the CLI and JSON. | You still need trusted producer jobs, repository rules, and verification against the exact release SHA. |
-| Container | Standardizes the runtime without requiring Python on every host. | Requires a container engine, a reviewed base-image digest, and a deployment test. The supplied Compose setup runs the offline simulation. |
+| Container | Standardizes the runtime without requiring Python on every host. | Requires a container engine and a reviewed base-image digest for deployment. The supplied Compose setup passed a hosted build and run of the offline simulation. |
 | External integration in Node.js, Go, or another stack | Keeps enterprise tooling in its existing language using the JSON contracts and exit codes. | The reference gate still needs Python on its execution runner. See [interoperability](../../docs/interoperability.md). |
 
 Signed CI evidence additionally requires OpenSSL 3 and a trusted producer key.
@@ -39,17 +39,20 @@ freshness, exact-revision enforcement, retention, and recovery ownership.
 
 | Check | Result |
 | --- | --- |
-| Wheel build and checksum | Passed |
+| Wheel build and checksum | Passed. The pinned GitHub wheel matched the tested local bytes. |
 | Clean install outside the source checkout and dependency consistency | Passed |
 | All six installed CLI entry points | Passed |
 | Full test suite against the installed wheel | Passed, 20 tests |
-| Signed evidence and tamper rejection | Passed in the installed-wheel suite |
+| Signed evidence and tamper rejection | Passed. The installed CLI accepted signed fixture evidence and returned error after the bytes were altered. |
 | Node.js report consumption and revision mismatch rejection | Passed |
 | Compose configuration | Passed |
-| Hosted CI matrix, including Python 3.10 | Pending remote verification |
-| Container build and execution | Pending. The local Docker daemon denied access. |
+| Hosted CI matrix and security gate | Passed on Python 3.10 and 3.12. [CI matrix](https://github.com/bijit-ghosh/CyberOps/actions/runs/44212037945) · [Security gate](https://github.com/bijit-ghosh/CyberOps/actions/runs/44212037929) |
+| Container build and execution | Passed on the hosted runner. The network-disabled Compose simulation produced 30 events and ten decisions. [Container and matrix run](https://github.com/bijit-ghosh/CyberOps/actions/runs/44212487999) |
 | Real enterprise pilot with an authenticated producer and exact-SHA enforcement | Pending deployment validation |
 
-Seven checks passed locally and three remain open. The release is suitable for
-a controlled pilot. Production sign-off requires evidence from the deployment
-environment, including recovery and key-rotation exercises.
+Nine checks passed. The remaining check requires a real protected repository, a
+trusted evidence producer, enforcement on the exact candidate SHA, and recorded
+block, verified pass, key rotation, and recovery results. The repository package
+can be used for that controlled pilot. Production sign-off depends on those
+results. GitHub Actions reported runtime deprecation notices for pinned actions.
+The workflows completed successfully.
