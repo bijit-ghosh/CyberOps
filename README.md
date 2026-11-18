@@ -2,30 +2,37 @@
 
 ## About
 
-### Product vision
+CyberOps is designed as a coordinated multi-agent swarm to continuously simulate advanced adversary tactics (Red), detect and isolate emerging threats in real time (Blue), and dynamically improve security posture through shared intelligence (Purple). Today, CyberOps brings that operating model to pre-release CI/CD and offline defensive evaluation.
 
-> This platform orchestrates coordinated red, blue, and purple team swarms to deliver continuous, autonomous cyber operations. By bridging reinforcement learning with real-time threat intelligence, it actively simulates adversary tactics and closes defense gaps offline and inline. It replaces static playbooks with decentralized decision-making that anticipates complex multi-step intrusion chains before they materialize. The system instantly translates discovered exposures into verified remediation paths and self-healing containment rules without human latency. Ultimately, it transforms enterprise security from a reactive burden into an adaptive, closed-loop engine of continuous resilience
+## Mission
 
-### Current implementation
+Help every organization build and operate software and AI systems that get harder to compromise with every release. Make security a continuous engineering practice, where teams can act at machine speed, prove that their controls work, and remain accountable for decisions that affect critical services.
 
-CyberOps orchestrates coordinated Red, Blue, and Purple teams to help enterprises
-find security gaps, validate fixes, and learn from recurring failures. It
-combines static analysis, revision-bound CI evidence, and offline simulations
-with a deterministic release gate. Blue teams receive prioritized remediation
-guidance. Purple teams verify fixes and turn approved lessons into regression
-requirements. The platform is model-agnostic and keeps production traces
-outside the current workflow.
+## Product vision
 
-See the [enterprise capability map](docs/enterprise-resilience.md) for the ten
-objectives, current capabilities, and roadmap.
+CyberOps will connect preventive testing, detection, response, and learning across the software lifecycle. Red will use authorized, controlled simulations to challenge assumptions about how applications and AI services are protected. Blue will turn trusted signals into prioritized decisions and contain threats within approved limits. Purple will verify that fixes work and turn lessons across teams into stronger controls and regression tests.
 
-| Team | Agents | Handoff |
-| --- | --- | --- |
-| Red | Supply-chain reviewer and runtime-identity reviewer | Parallel static checks identify unpinned build stages and missing explicit non-root identity in the final stage. |
-| Blue | Triage and remediation | Adds risk, severity, ownership and a concrete change for each observation. A component owner applies the change in Git. |
-| Purple | Verification and learning | Compares baseline and candidate evidence, makes the gate decision and records lessons for review. |
+Teams will be able to adopt those capabilities independently or as a coordinated swarm, choose their models and tools, and decide where automation can act. Every consequential decision should be traceable to evidence, an owner, and an approval policy.
 
-The article's decision traces, bounded authority, remediation validation and feedback loop map to a reviewable JSON artifact, a fixed set of checks, reruns against the revised build recipe and owner-reviewed lessons. Production telemetry is outside this system's inputs. Learning uses Git baseline files and versioned policy. [Agentic Security Framework](https://medium.com/@bijit211987/agentic-security-framework-1c253af8a223)
+## What we’ve achieved
+
+| Team | Shipped capabilities |
+| --- | --- |
+| Red | Reviews container build controls and evaluates defensive check results supplied by CI. |
+| Blue | Gives findings an owner, severity, and next step. The CI summary can surface reviewed reachability, control, identity, and data context. |
+| Purple | Makes a deterministic release decision, verifies fixes against a baseline, and proposes regression checks. The review ledger feeds analyst-labeled cases into offline evaluation. |
+
+CyberOps provides standalone team plugins and a bundled, model-agnostic CLI. It supports revision-bound evidence, optional signature verification, and stable finding IDs across open and resolved CI summaries. The current workflow uses pre-release evidence and keeps production traces disconnected. [Architecture](docs/architecture.md) · [Readiness and verification](docs/one-page-status.md)
+
+## What we need to achieve
+
+1. **Prove the full loop on mission-critical services.** Connect authenticated evidence producers, require the gate on the exact release revision, and verify real application and AI guardrail fixes in their normal pull-request workflows.
+2. **Make risks explainable across the enterprise.** Connect services, dependencies, identities, controls, data classes, and ownership so teams can see what is affected and what evidence supports the decision.
+3. **Move from recommendations to governed response.** Establish authenticated approvals, scoped actions, protected-service safeguards, and rollback. Validate response policies offline before introducing authorized live detection and containment.
+4. **Turn each verified fix into durable protection.** Carry approved lessons across components, validate changes against held-out evidence, and measure time to verified fix, recurrence, and control coverage.
+5. **Scale with deployment flexibility.** Support enterprise CI and security integrations, independently deployable teams, and traceable decisions across environments and model providers.
+
+[Enterprise capability map and examples](docs/enterprise-resilience.md) · [Founding design article](https://medium.com/@bijit211987/agentic-security-framework-1c253af8a223)
 
 ## Run it locally
 
