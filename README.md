@@ -1,5 +1,7 @@
 # CyberOps
 
+![CyberOps banner with an infinity loop inside a shield](docs/assets/cyberops-infinite-shield.jpg)
+
 ## About
 
 CyberOps is designed as a coordinated multi-agent swarm to continuously simulate advanced adversary tactics (Red), detect and isolate emerging threats in real time (Blue), and dynamically improve security posture through shared intelligence (Purple). Today, CyberOps brings that operating model to pre-release CI/CD and offline defensive evaluation.
