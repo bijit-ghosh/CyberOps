@@ -26,7 +26,7 @@ decisions are simulation rules, not learned rewards.
 
 | Items | Status |
 | --- | --- |
-| 1–4 | Dual-license texts consolidated under LICENSES. Editable packaging, ignore rules, environment template, disclosure policy, Ruff and strict type policy for the swarm package are in place. |
+| 1–4 | Apache 2.0 is the single project license. Editable packaging, ignore rules, environment template, disclosure policy, Ruff and strict type policy for the swarm package are in place. |
 | 5–6 | Network-disabled Compose simulation and contributor and architecture guides are in place. The queue is in-process. |
 | 7–8 | Validated typed envelope and separate bounded async queue are in place. A distributed broker and taxonomy fields remain open. |
 | 9–11 | Hierarchical defensive worker scheduling, persistent memory and a Purple graph of control, evidence and mitigation remain open. |

@@ -118,8 +118,7 @@ promoting checks in the included workflow so CI can supply their results.
 
 ## License
 
-Use CyberOps under either the [MIT License](LICENSES/MIT.txt) or
-[Apache License 2.0](LICENSES/Apache-2.0.txt).
+CyberOps is licensed under [Apache License 2.0](LICENSE).
 
 ## Plugin deployment modes
 
@@ -146,3 +145,5 @@ see the [defensive replay](docs/defensive-learning.md) and
 - [Purple review ledger and offline learning feedback](docs/purple-ledger.md)
 
 - [One-page status and signed evidence setup](docs/one-page-status.md)
+
+- [Cross-language contracts and Node.js example](docs/interoperability.md)

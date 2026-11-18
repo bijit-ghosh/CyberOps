@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CyberOps gate report v1 consumer contract",
+  "type": "object",
+  "required": ["schema_version", "decision"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "decision": {"enum": ["pass", "block", "error"]},
+    "candidate_revision": {"type": "string", "pattern": "^[a-f0-9]{40}$", "minLength": 40, "maxLength": 40},
+    "effective_policy_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$", "minLength": 64, "maxLength": 64},
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "purple"],
+        "properties": {
+          "name": {"type": "string"},
+          "purple": {
+            "type": "object",
+            "required": ["decision"],
+            "properties": {"decision": {"enum": ["pass", "block", "error"]}}
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"decision": {"enum": ["pass", "block"]}}},
+      "then": {"required": ["effective_policy_sha256", "components"]}
+    }
+  ]
+}

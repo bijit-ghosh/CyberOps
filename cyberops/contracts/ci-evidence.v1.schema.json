@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CyberOps CI evidence v1",
+  "type": "object",
+  "required": ["schema_version", "revision", "checks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$", "minLength": 40, "maxLength": 40},
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["component", "check", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "component": {"$ref": "#/$defs/identifier"},
+          "check": {"$ref": "#/$defs/identifier"},
+          "status": {"enum": ["pass", "fail", "error"]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$",
+      "not": {"pattern": "[^A-Za-z0-9_.-]"}
+    }
+  }
+}
