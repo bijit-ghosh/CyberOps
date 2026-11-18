@@ -109,12 +109,10 @@ trusted `cyberops-learning.json` file. Later runs apply that requirement through
 this policy from the trusted checkout. Connect the evidence producer before
 promoting checks in the included workflow so CI can supply their results.
 
-## Architecture and metrics
+## Documentation
 
-- [Architecture, flowchart and animated walkthrough](docs/architecture.md)
-- [Demo results and operational metrics](docs/metrics.md)
-- [Agentic platform comparison and roadmap](docs/platform-comparison.md)
-- [Enterprise connector catalog and evidence exporter](docs/connectors.md)
+Use the [documentation index](docs/README.md) to find operator quickstarts,
+integration contracts, architecture and readiness status.
 
 ## License
 
@@ -142,10 +140,3 @@ reviews. The container has no runtime network access. See the
 see the [defensive replay](docs/defensive-learning.md) and
 [CI evidence quickstart](#evaluate-ci-check-evidence).
 
-- [Purple review ledger and offline learning feedback](docs/purple-ledger.md)
-
-- [One-page status and signed evidence setup](docs/one-page-status.md)
-
-- [Cross-language contracts and Node.js example](docs/interoperability.md)
-
-- [Initiate or resume the defensive feedback cycle](docs/feedback-cycle.md)

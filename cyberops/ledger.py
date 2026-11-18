@@ -59,20 +59,26 @@ def open_ledger(path):
                 reviewer TEXT
             )
         """)
+        database.execute("CREATE INDEX IF NOT EXISTS cases_policy_review ON cases(policy, review)")
     except sqlite3.Error:
         database.close()
         raise
     return database
 
 
+def insert_findings(database, entries):
+    cursor = database.executemany(
+        """INSERT INTO cases(id, revision, policy, component, control)
+           VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING""",
+        entries,
+    )
+    return cursor.rowcount
+
+
 def ingest(database, path):
     entries = read_findings(path)
     with database:
-        cursor = database.executemany(
-            "INSERT OR IGNORE INTO cases(id, revision, policy, component, control) VALUES (?, ?, ?, ?, ?)",
-            entries,
-        )
-    return cursor.rowcount
+        return insert_findings(database, entries)
 
 
 def record_review(database, case_id, reviewer, label):

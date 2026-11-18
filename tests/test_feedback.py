@@ -25,6 +25,13 @@ class FeedbackTest(unittest.TestCase):
             db = root / "ledger.db"
             with closing(open_ledger(db)) as ledger:
                 self.assertEqual(cycle(ledger, policy)["stage"], "evidence_required")
+                corrupt = root / "corrupt.json"
+                corrupt.write_text("{}")
+                with self.assertRaises(ValueError):
+                    cycle(ledger, policy, [report, corrupt])
+                self.assertEqual(cycle(ledger, policy)["stage"], "evidence_required")
+                with self.assertRaisesRegex(ValueError, "feedback policy"):
+                    cycle(ledger, "0" * 64, [report])
                 first = cycle(ledger, policy, [report])
                 self.assertEqual((first["stage"], first["imported"]), ("review_required", 2))
                 for finding in first["pending"]:
@@ -39,4 +46,6 @@ class FeedbackTest(unittest.TestCase):
                 checked = cycle(ledger, policy, [report], holdout)
                 self.assertEqual((checked["stage"], checked["imported"]), ("evaluated", 0))
                 self.assertEqual(checked["evaluation"]["fallbacks"], 1)
+                self.assertEqual(checked["training_sha256"],
+                                 cycle(ledger, policy, held_out=holdout)["training_sha256"])
                 self.assertEqual(cycle(ledger, "0" * 64)["stage"], "evidence_required")

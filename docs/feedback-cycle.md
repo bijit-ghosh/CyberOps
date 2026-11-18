@@ -23,7 +23,10 @@ The loop is offline, advisory, and separate from the release gate.
    ```
 
 The stages are `evidence_required`, `review_required`, `holdout_required`
-and `evaluated`. Reimports are idempotent. To add another revision, rerun with
+and `evaluated`. Reimports are idempotent. An invalid report or a finding
+from a different policy rejects the entire import batch. Each successful
+evaluation records fingerprints of the reviewed training rows and the
+holdout file. To add another revision, rerun with
 its trusted report. Reviews train the offline evaluator, and overlapping case
 IDs are rejected. The supplied holdout illustrates fallback with unfamiliar
 controls. Use independently reviewed, comparable cases to measure quality.
