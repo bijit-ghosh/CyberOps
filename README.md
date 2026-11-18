@@ -44,6 +44,8 @@ Track **mean time to detect**, **mean time to verified remediation**, **critical
 
 ## Operator console
 
+[Explore the public feature portal and interactive demo](https://cyberops-platform.bijit211987.chatgpt.site).
+
 CyberOps 0.2.0 adds a browser console and authenticated local API for finding
 triage and Purple reviews. [Start the console](docs/operator-console.md)
 
@@ -158,9 +160,5 @@ docker compose run --rm simulation
 ```
 
 The simulation emits a JSON audit log and decision counts for synthetic control
-reviews. The container has no runtime network access. See the
-[swarm architecture and 30-item status](docs/swarm-architecture.md) and
-[contributor guide](docs/CONTRIBUTING.md). For learning and CI evidence examples,
-see the [defensive replay](docs/defensive-learning.md) and
-[CI evidence quickstart](#evaluate-ci-check-evidence).
-
+reviews. The container has no runtime network access. For setup, architecture,
+and contributor resources, see the [documentation index](docs/README.md).
