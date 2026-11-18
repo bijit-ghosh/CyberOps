@@ -35,6 +35,7 @@ jobs:
           "$venv/cyberops-replay" --help
           "$venv/cyberops-console" --help
           "$venv/cyberops-simulate" --seed 42 --steps 10
+          "$venv/python" "$GITHUB_WORKSPACE/examples/quickstart.py" --output-dir "$RUNNER_TEMP/cyberops-demo"
   container:
     runs-on: ubuntu-24.04
     timeout-minutes: 5

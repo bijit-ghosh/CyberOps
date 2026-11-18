@@ -1,0 +1,16 @@
+name: Feature or integration proposal
+description: Suggest a defensive workflow, an evidence producer, or a usability improvement.
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Who needs this and what are they trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What would a successful implementation demonstrate?
+      description: Include a testable outcome and describe any inputs or outputs involved.
+    validations:
+      required: true

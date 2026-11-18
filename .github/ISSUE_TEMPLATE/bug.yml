@@ -1,0 +1,24 @@
+name: Bug report
+description: Report a reproducible problem with the gate, console, or offline tools.
+title: "[Bug]: "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: CyberOps version or commit, Python version, and OS
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic or redacted inputs. Remove tokens, private evidence, and personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Expected and observed behavior
+      description: Include the exit code and relevant redacted output.
+    validations:
+      required: true

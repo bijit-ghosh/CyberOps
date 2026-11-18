@@ -2,73 +2,78 @@
 
 ![CyberOps banner with an infinity loop inside a shield](docs/assets/cyberops-infinite-shield.jpg)
 
+**A CI security gate that turns failed controls into verified fixes.**
+
+[![Defensive simulation](https://github.com/bijit-ghosh/CyberOps/actions/workflows/simulation.yml/badge.svg?branch=main)](https://github.com/bijit-ghosh/CyberOps/actions/workflows/simulation.yml)
+[![CyberOps gate](https://github.com/bijit-ghosh/CyberOps/actions/workflows/cyberops.yml/badge.svg?branch=main)](https://github.com/bijit-ghosh/CyberOps/actions/workflows/cyberops.yml)
+[![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
+[Quickstart](#run-it-locally) · [Interactive demo](https://cyberops-platform.bijit211987.chatgpt.site/#demo) · [Packages](#releases) · [Architecture](docs/architecture.md) · [Contributing](docs/CONTRIBUTING.md) · [Security](SECURITY.md)
+
 ## About
 
+CyberOps coordinates Red, Blue, and Purple teams around the release decision.
+It explains what failed, who owns the fix, and what evidence proves resolution.
+Today it operates in pre-release CI/CD and offline defensive evaluation.
+
+## Run it locally
+
+Clone the repository and run the synthetic AI guardrail quickstart. It uses
+Python 3.10 or later and requires no third-party Python packages.
+
+```sh
+git clone https://github.com/bijit-ghosh/CyberOps.git
+cd CyberOps
+python3 examples/quickstart.py
+```
+
+The demo verifies an expected block, a pass on the corrected revision, and a
+regression proposal. It prints the location of the two JSON reports. Use
+`--output-dir` to choose a report directory. [Walk through the same finding in the browser](https://cyberops-platform.bijit211987.chatgpt.site/#demo).
+
+## How it works
+
 ![Animated infinity loop showing Red review, Blue remediation, and Purple verification feeding the next review](docs/assets/cyberops-infinity-loop.gif)
-
-CyberOps coordinates Red, Blue, and Purple teams to find security gaps, guide fixes, and verify what changed. Today it operates in pre-release CI/CD and offline defensive evaluation.
-
-## Mission
-
-Make every release an opportunity to strengthen the defenses of software and AI systems. Give engineering and security teams the evidence to act quickly, verify their controls, and stay accountable for decisions that affect critical services.
-
-## Product vision
-
-CyberOps will connect preventive testing, detection, response, and learning across the software lifecycle. Red will challenge controls in authorized simulations. Blue will use trusted signals to prioritize and contain threats within approved limits. Purple will verify fixes and turn shared lessons into stronger controls.
-
-Teams will be able to deploy each capability independently or run the teams together, choose their models and tools, and define where automation can act. Every consequential decision should be traceable to evidence, an owner, and an approval policy.
-
-## What we’ve achieved
 
 | Team | What ships today |
 | --- | --- |
 | Red | Reviews container build controls and evaluates defensive check results supplied by CI. |
-| Blue | Assigns an owner, severity, and next step. The CI summary can include reviewed context about reachability, controls, identities, and data. |
-| Purple | Sets a deterministic release decision, verifies fixes against a baseline, and proposes regression checks. The review ledger supplies analyst-labeled cases for offline evaluation. |
+| Blue | Assigns an owner, severity, and next step. The CI summary surfaces reviewed context about reachability, controls, identities, and data when available. |
+| Purple | Issues a deterministic release decision, verifies fixes against a baseline, and proposes regression checks. The ledger supplies analyst-labeled cases for offline evaluation. |
 
-CyberOps ships standalone team plugins and a bundled, model-agnostic CLI. It supports evidence tied to a Git revision, optional signature verification, and stable finding IDs across CI runs. Production traces remain outside the current workflow. [Architecture](docs/architecture.md) · [Readiness and verification](docs/one-page-status.md)
+Use the standalone team plugins or bundled CLI. Evidence is tied to a Git
+revision, signatures can be verified using a trusted producer key, and stable
+finding IDs connect open and resolved CI summaries. [Architecture](docs/architecture.md) · [Validation status](docs/one-page-status.md)
 
-## What we need to achieve
+## Releases
 
-1. **Prove the loop on critical services.** Connect authenticated evidence producers, require a result for the exact release revision, and verify application and AI guardrail fixes in real pull requests.
-2. **Show what a finding affects.** Link services, controls, identities, and data to the evidence and owner responsible for the fix.
-3. **Govern live response.** Establish authenticated approvals, scoped actions, protected-service safeguards, and rollback. Validate response policies offline before deploying authorized live detection and containment.
-4. **Make verified fixes last.** Carry approved lessons into regression policy and check whether findings recur across releases.
-5. **Support different enterprise environments.** Extend CI and security integrations while keeping team interfaces portable and decisions auditable.
-
-[Enterprise capability map and examples](docs/enterprise-resilience.md) · [Founding design article](https://medium.com/@bijit211987/agentic-security-framework-1c253af8a223)
-
-## Key metrics
-
-Track **mean time to detect**, **mean time to verified remediation**, **critical-component coverage**, **required-evidence completeness**, and **finding recurrence rate**. The local synthetic gate produced a blocked report in 55 ms median and verified the corrected fixture in 78 ms median across 20 samples per case. Enterprise detection and remediation times have yet to be measured. [Definitions and benchmark scope](docs/metrics.md)
+- [CyberOps 0.2.0](releases/v0.2.0/README.md) includes the operator console and authenticated local API. [Start the console](docs/operator-console.md).
+- [CyberOps 0.1.0](releases/v0.1.0/README.md) is the initial gate and pilot package.
 
 ## Operator console
 
-[Explore the public feature portal and interactive demo](https://cyberops-platform.bijit211987.chatgpt.site).
+Use the packaged console to inspect CI evidence, search findings, and record
+Purple reviews. Explore the [public feature portal](https://cyberops-platform.bijit211987.chatgpt.site)
+or follow the [local setup guide](docs/operator-console.md) to use your own report.
 
-CyberOps 0.2.0 adds a browser console and authenticated local API for finding
-triage and Purple reviews. [Start the console](docs/operator-console.md)
+## Mission
 
-## Initial release
+Make each release an opportunity to strengthen the defenses of software and AI
+systems. Give engineering and security teams the evidence to act quickly and
+verify that their controls work.
 
-[CyberOps 0.1.0](releases/v0.1.0/README.md) includes the installable Python wheel,
-a checksum, and an enterprise pilot validation checklist.
+## Product vision
 
-## Run it locally
+Connect preventive testing, detection, governed response, and shared learning
+across the software lifecycle. The next milestones are trusted evidence
+producers, verification on critical services, richer control context, and durable
+regression policy. Production response is outside the current release. [Capability map](docs/enterprise-resilience.md) · [Founding design article](https://medium.com/@bijit211987/agentic-security-framework-1c253af8a223)
 
-Use Python 3.10 or later. The default gate has no third-party Python dependencies.
+## Key metrics
 
-```sh
-python3 -m cyberops --root examples/before \
-  --inventory examples/components.json --report /tmp/cyberops-before.json
-
-python3 -m cyberops --root examples/after --baseline-root examples/before \
-  --inventory examples/components.json --report /tmp/cyberops-after.json
-```
-
-The first command exits 1 with two policy findings. The second exits 0 with both rules marked resolved and lessons attached. Exit 2 indicates invalid, missing or unsupported evidence. The example digest is a placeholder for static verification. Use a verified registry digest in deployable images.
-
-A report binds each successful assessment to SHA-256 hashes of the reviewed Dockerfiles. Differences are tracked per component and rule. A rule with one remaining occurrence stays open. Purple confirms that the static policy now passes. Application build and functional checks belong in separate CI jobs.
+Track mean time to detect, mean time to verified remediation, critical-component
+coverage, required-evidence completeness, and recurrence. Enterprise detection
+and remediation times require a real-service pilot. [Definitions and synthetic benchmarks](docs/metrics.md)
 
 ## Connect a repository
 
