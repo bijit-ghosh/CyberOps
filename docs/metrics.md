@@ -1,40 +1,30 @@
-# Metrics and verification
+# CyberOps metrics
 
-## What the reference run achieves
+Measure the pre-release path from a change entering CI to a fix being verified. Use the same definitions across pilot repositories and keep results scoped to configured controls.
 
-The reference run uses a sample Dockerfile and synthetic CI check results. The corrected candidate passes the gate and Purple marks three baseline rules resolved. These results describe the fixture.
+## The five metrics
 
-| Metric | Baseline | Corrected candidate |
-| --- | ---: | ---: |
-| Open rules | 3 | 0 |
-| Failed required CI checks | 1 | 0 |
-| Passing required CI checks | 1 of 2 | 2 of 2 |
-| Resolved rules against the baseline | — | 3 |
-| Lessons recorded by Purple | — | 3 |
-| Regression-check proposals | — | 1 |
-| Gate decision | Block | Pass |
-
-The three baseline rules are image pinning, explicit non-root user and dependency policy. The regression proposal comes from the resolved dependency check. The Dockerfile digest is a fixture placeholder, so the run verifies policy behavior without building or deploying an image.
-
-## What to track across CI runs
-
-| Metric | Definition | Data needed |
+| Metric | How to calculate it | What it tells you |
 | --- | --- | --- |
-| Registered critical component coverage | Critical components assessed ÷ critical components in the authoritative catalog | Component inventory, CI reports, service catalog |
-| Required evidence completeness | Required component-check pairs with a valid result ÷ required pairs | Policy and producer artifacts. Track missing and errored outcomes separately. |
-| Gate outcomes | Counts and rates of pass, block and error for completed evaluations | One report per evaluated candidate. Keep error rates visible alongside blocks. |
-| Time to verified fix | Median and p90 elapsed time from first blocked result to first valid result marking that component and rule resolved | CI timestamps and check history keyed by component and rule |
-| Finding recurrence | Previously resolved component-rule pairs that reopen ÷ pairs eligible for observation in the same window | Historical gate reports, with observation windows and policy versions |
-| Lesson adoption | Approved regression requirements ÷ eligible proposals in the period | Review records, learning policy history and Purple lessons |
+| **1. Mean time to detect (MTTD)** | Mean elapsed time from the first eligible CI trigger for a revision carrying a finding to publication of its first valid failed-control result. | How quickly the pipeline surfaces a known control failure. Include CI queue and producer time. |
+| **2. Mean time to verified remediation (MTTR)** | Mean elapsed time from the first valid failed-control result to the first valid result verifying that the same finding is resolved on the corrected revision. | How quickly an owner can act and prove the fix. Report unresolved findings and their age alongside MTTR. |
+| **3. Critical-component coverage** | Critical components with a completed assessment in the reporting window ÷ critical components in the approved inventory. | How much of the intended scope the gate actually assesses. |
+| **4. Required-evidence completeness** | Required component–check pairs with a valid pass or fail result ÷ all required pairs for assessed candidates. | Whether the gate has enough evidence to decide. Report missing and errored results separately. |
+| **5. Finding recurrence rate** | Previously verified component–rule pairs that reopen ÷ verified pairs assessed again under comparable policy within the same follow-up window. | Whether fixes and regression controls hold up on later revisions. Count each eligible pair once per window. |
 
-The report contains gate decisions, findings and evidence hashes. Time-based and historical metrics require retaining and joining reports with CI or Git metadata. Collect a baseline before setting performance targets. A passing report reflects the configured checks, and the metrics above do not require production traces.
+For MTTD and MTTR, show the mean, median, p90, sample size, and measurement window. Use CI timestamps and retain the repository, candidate revision, component, rule, effective policy fingerprint, and report outcome. Count one detection and one verified resolution per finding episode. Treat a missing result or gate error as an evidence problem, and count a resolution only when valid evidence verifies the corrected candidate. When the first eligible trigger is unknown, report detection time as unavailable for that case.
 
-Reproduce the example with the [README commands](../README.md#evaluate-ci-check-evidence).
+## What is measured today
 
-## Counters in the audit report
+| Local synthetic measurement | Samples | Median | p90 |
+| --- | ---: | ---: | ---: |
+| Gate produces a blocked report | 20 | 55 ms | 65 ms |
+| Gate evaluates the corrected fixture against its baseline and passes | 20 | 78 ms | 82 ms |
 
-Completed assessments include component pass, block and error counts and required
-check counts for pass, fail, error and missing. Use these counts to compute
-per-run evidence completeness and keep execution errors visible. Input validation
-errors can occur before these counters are available. The report also includes
-the effective component policy hash and a stage trace for each assessed component.
+These wall-clock measurements include Python process startup and report writing. The fixture uses the repository's two Dockerfile examples. The run does not include hosted CI queue time, external scanner jobs, or a human making a fix. **Enterprise MTTD and MTTR have yet to be measured.** A CI pilot on a real service is the first opportunity to measure both end to end.
+
+The separate [CI evidence demo](../README.md#evaluate-ci-check-evidence) moves from three open rules to zero and from one of two required checks passing to both passing. Purple records three resolved rules and one regression proposal. The demo verifies gate behavior with synthetic results.
+
+## Report fields and collection
+
+The audit report includes component pass, block, and error counts plus required-check counts for pass, fail, error, and missing. Early input errors may occur before those counters are available. The report also records the effective policy fingerprint and per-component decision stages. Join retained reports with trusted CI timestamps to calculate detection and remediation time. Use the approved service inventory for the coverage denominator.
