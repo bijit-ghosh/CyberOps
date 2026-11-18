@@ -34,3 +34,26 @@ jobs:
           "$venv/cyberops-feedback" --help
           "$venv/cyberops-replay" --help
           "$venv/cyberops-simulate" --seed 42 --steps 10
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Build and run the isolated simulation
+        run: |
+          set -eu
+          docker compose config --quiet
+          docker compose build
+          docker compose run --rm -T simulation > "$RUNNER_TEMP/cyberops-container.json"
+          python3 - "$RUNNER_TEMP/cyberops-container.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1]) as stream:
+              report = json.load(stream)
+          assert report["seed"] == 42
+          assert report["steps"] == 10
+          assert len(report["events"]) == 30
+          assert sum(report["decisions"].values()) == 10
+          PY
